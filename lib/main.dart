@@ -33,6 +33,9 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
 
+  String strMnemonic   = '';
+  String strReadResult = '';
+
   JavascriptChannel _alertJavascriptChannel(BuildContext context) {
     return JavascriptChannel(
         name: 'Toast',
@@ -45,61 +48,124 @@ class _MyHomePageState extends State<MyHomePage> {
 
   @override
   Widget build(BuildContext context) {
+
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Flutter WebView example'),
+        title: const Text('OBD JS SDK Demo'),
       ),
 
-      body: Builder(builder: (BuildContext context) {
-        return WebView(
-          initialUrl: 'file:///android_asset/flutter_assets/assets/index.html',
-          javascriptMode: JavascriptMode.unrestricted,
+      body: SafeArea(
+        child: Column(
+          children: <Widget>[
+            Expanded(
+              child: _loadWebView()
+            ),
 
-          onWebViewCreated: (WebViewController webViewController) {
-            _controller.complete(webViewController);
-          },
+            _callGenMnemonic(),
+            SizedBox(height: 20),
+            Text(
+              'Gen Mnemonic is: ' + strMnemonic
+            ),
+            SizedBox(height: 100),
 
-          javascriptChannels: <JavascriptChannel>[
-            _alertJavascriptChannel(context),
-          ].toSet(),
-
-          navigationDelegate: (NavigationRequest request) {
-            if (request.url.startsWith('js://webview')) {
-              // showToast('JS调用了Flutter By navigationDelegate');
-              print('blocking navigation to $request}');
-              return NavigationDecision.prevent;
-            }
-            print('allowing navigation to $request');
-            return NavigationDecision.navigate;
-          },
-
-          onPageFinished: (String url) {
-            print('Page finished loading: $url');
-          },
-        );
-      }),
-
-      floatingActionButton: jsButton(),
+            _readFromLocalStorage(),
+            SizedBox(height: 20),
+            Text(
+              'Read Result is: ' + strReadResult
+            ),
+            SizedBox(height: 150),
+          ],
+        ),
+      )
     );
   }
 
-  Widget jsButton() {
+  // Widget
+  Widget _loadWebView() {
+    return WebView(
+      initialUrl: 'file:///android_asset/flutter_assets/assets/index.html',
+      javascriptMode: JavascriptMode.unrestricted,
+
+      onWebViewCreated: (WebViewController webViewController) {
+        _controller.complete(webViewController);
+      },
+
+      javascriptChannels: <JavascriptChannel>[
+        _alertJavascriptChannel(context),
+      ].toSet(),
+
+      navigationDelegate: (NavigationRequest request) {
+        if (request.url.startsWith('js://webview')) {
+          // showToast('JS调用了Flutter By navigationDelegate');
+          print('blocking navigation to $request}');
+          return NavigationDecision.prevent;
+        }
+        print('allowing navigation to $request');
+        return NavigationDecision.navigate;
+      },
+
+      onPageFinished: (String url) {
+        print('Page finished loading: $url');
+      },
+    );
+  }
+
+  // Widget
+  Widget _callGenMnemonic() {
     return FutureBuilder<WebViewController>(
       future: _controller.future,
       builder: (BuildContext context,
           AsyncSnapshot<WebViewController> controller) {
         if (controller.hasData) {
-          return FloatingActionButton(
+          return RaisedButton (
             onPressed: () async {
               _controller.future.then((controller) {
                 controller
                   .evaluateJavascript('genMnemonic()')
                   .then((result) {
-                    print("==> result = $result");
+                    print("==> Gen result = $result");
+                    strMnemonic = result;
+                    setState(() {});
                   });
               });
             },
-            child: Text('call JS'),
+
+            color: Color(0xFF6690F9),
+            padding: EdgeInsets.symmetric(horizontal: 46),
+            child: Text(
+              'Call genMnemonic()',
+              style: TextStyle(color: Colors.white),
+            ),
+          );
+        }
+        return Container();
+    });
+  }
+
+  // Widget
+  Widget _readFromLocalStorage() {
+    return FutureBuilder<WebViewController>(
+      future: _controller.future,
+      builder: (BuildContext context,
+          AsyncSnapshot<WebViewController> controller) {
+        if (controller.hasData) {
+          return RaisedButton (
+            onPressed: () async {
+              _controller.future.then((controller) {
+                controller
+                  .evaluateJavascript('readFromLocalStorage()')
+                  .then((result) {
+                    print("==> Read result = $result");
+                  });
+              });
+            },
+
+            color: Color(0xFF6690F9),
+            padding: EdgeInsets.symmetric(horizontal: 30),
+            child: Text(
+              'Read From Local Storage',
+              style: TextStyle(color: Colors.white),
+            ),
           );
         }
         return Container();
