@@ -29,7 +29,7 @@ function sdkSaveMnemonic(value) {
 
     // If has data.
     if (mnemonic) {
-        // console.info('HAS DATA');
+        console.info('sdkSaveMnemonic -  HAS DATA');
         let new_data = {
             mnemonic: value,
         }
@@ -38,7 +38,7 @@ function sdkSaveMnemonic(value) {
         localStorage.setItem('saveMnemonic', JSON.stringify(mnemonic));
 
     } else {
-        // console.info('FIRST DATA');
+        console.info('sdkSaveMnemonic - FIRST DATA');
         let data = {
             result: [{
                 mnemonic: value
@@ -46,5 +46,34 @@ function sdkSaveMnemonic(value) {
         }
         // sessionStorage.setItem(itemMnemonic, JSON.stringify(data));
         localStorage.setItem('saveMnemonic', JSON.stringify(data));
+    }
+}
+
+// FOR TEST
+// Get mnemonic words from local storage.
+function sdkGetMnemonic() {
+
+    let resp = JSON.parse(localStorage.getItem('saveMnemonic'));
+
+    // If has data.
+    if (resp) {
+        console.info('sdkGetMnemonic - HAS DATA');
+        let lastest = resp.result.length - 1;
+        console.info('sdkGetMnemonic - lastest = ' + lastest);
+        console.info('sdkGetMnemonic - DATA = ' + resp.result[lastest].mnemonic);
+        return resp.result[lastest].mnemonic;
+
+        // for (let i = 0; i < resp.result.length; i++) {
+        //     if ($("#logined").text() === resp.result[i].userID) {
+        //         for (let j = 0; j < resp.result[i].data.length; j++) {
+        //             if (pubkey === resp.result[i].data[j].pubkey) {
+        //                 return resp.result[i].data[j].wif;
+        //             }
+        //         }
+        //     }
+        // }
+        // return '';
+    } else {
+        return 'NO DATA';
     }
 }

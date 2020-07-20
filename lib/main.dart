@@ -153,9 +153,11 @@ class _MyHomePageState extends State<MyHomePage> {
             onPressed: () async {
               _controller.future.then((controller) {
                 controller
-                  .evaluateJavascript('readFromLocalStorage()')
+                  .evaluateJavascript('sdkGetMnemonic()')
                   .then((result) {
                     print("==> Read result = $result");
+                    strReadResult = result;
+                    setState(() {});
                   });
               });
             },
